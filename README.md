@@ -2,3 +2,7 @@
 # cmpe202-uml-parser
 CMPE202 Project
 
+# Build & Run
+  - Install gradle (https://docs.gradle.org/current/userguide/installation.html)
+  - `gradle build` to build jar file
+  - `gradle run` to run directly on JVM
