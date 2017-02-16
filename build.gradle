@@ -23,6 +23,9 @@ dependencies {
     // The production code uses Guava
     compile 'com.google.guava:guava:20.0'
 
+    // java parser
+    compile 'com.github.javaparser:javaparser-core:3.0.1'
+    compile 'com.github.javaparser:java-symbol-solver-core:0.4.0'
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
 }
