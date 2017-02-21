@@ -22,6 +22,55 @@ class Java::ComGithubJavaparserAstBody::ClassOrInterfaceDeclaration
     {
       type: interface? ? :interface : :class,
       modifier: modifiers.any? ? modifiers.first.name.downcase : nil,
+      extends: extended_types.map(&:to_s),
+      implements: implemented_types.map(&:to_s),
+    }
+  end
+end
+
+class Java::ComGithubJavaparserAstBody::ConstructorDeclaration
+  alias_method :simple_name, :name
+  def name
+    simple_name.identifier
+  end
+
+  def params
+    Hash[parameters.map do |p|
+      [p.name.to_s, p.type.to_s]
+    end]
+  end
+
+  def properties
+    {
+      type: :constructor,
+      modifier: modifiers.any? ? modifiers.first.name.downcase : nil,
+      parameters: params,
+    }
+  end
+end
+
+class Java::ComGithubJavaparserAstBody::MethodDeclaration
+  alias_method :simple_name, :name
+  def name
+    simple_name.identifier
+  end
+
+  def data_type
+    type.to_s
+  end
+
+  def params
+    Hash[parameters.map do |p|
+      [p.name.to_s, p.type.to_s]
+    end]
+  end
+
+  def properties
+    {
+      type: :method,
+      modifier: modifiers.any? ? modifiers.first.name.downcase : nil,
+      return_type: data_type,
+      parameters: params,
     }
   end
 end
@@ -70,12 +119,11 @@ class Java::ComGithubJavaparserAstBody::VariableDeclarator
   end
 
   def properties
-    #binding.pry
     {
       type: :attribute,
       data_type: data_type,
       is_association: association?,
-      is_collection: collection?
+      is_collection: collection?,
     }
   end
 end
@@ -92,7 +140,10 @@ class AstVisitor < VoidVisitorAdapter
       node.variables.each do |v|
         tree[v.name] = v.properties.merge(modifier: modifier)
       end
-      super(node, tree)
+    when Java::ComGithubJavaparserAstBody::MethodDeclaration
+      tree[node.name] = node.properties
+    when Java::ComGithubJavaparserAstBody::ConstructorDeclaration
+      tree[node.name] = node.properties
     else
       super(node, tree)
     end
