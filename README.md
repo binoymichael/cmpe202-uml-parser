@@ -2,7 +2,8 @@
 # cmpe202-uml-parser
 CMPE202 Project
 
-# Build & Run
-  - Install gradle (https://docs.gradle.org/current/userguide/installation.html)
-  - `gradle build` to build jar file
-  - `gradle run` to run directly on JVM
+# Create AST Tree
+ - ruby lib/parser.rb test
+
+# Make UML class diagram
+  - java -jar lib/umlgraph-5.7.2.23.jar -private -attributes -visibility -output - uml.java | dot -Tpng -ograph.png
