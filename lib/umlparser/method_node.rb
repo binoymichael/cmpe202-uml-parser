@@ -1,3 +1,4 @@
+#TODO cache all params
 module Umlparser
   class MethodNode
     
@@ -20,7 +21,8 @@ module Umlparser
                       end]
     end
 
-    def data_type
+    #TODO what about collection parameters
+    def type
       java_node.type.to_s
     end
 

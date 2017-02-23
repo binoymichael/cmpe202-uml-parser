@@ -1,22 +1,27 @@
 module Umlparser
   class AttributeNode
     
-    attr_reader :java_node
-    attr_accessor :visible
+    attr_reader :java_node, :modifier
+    attr_accessor :visible, :association, :reverse_association
     alias_method :visible?, :visible
+    alias_method :association?, :association
+    alias_method :reverse_association?, :reverse_association
 
     def initialize(modifier, java_node)
       @modifier = modifier
       @java_node = java_node
       @visible = true
+      @reverse_association = nil
+
+      @association = if java_node.type.element_type.is_a?(Java::ComGithubJavaparserAstType::ClassOrInterfaceType) 
+                         collection? ? '0..*' : '0..1'
+                     else
+                       false
+                     end
     end
 
     def name
       @name ||= java_node.name.identifier
-    end
-
-    def association?
-      java_node.type.element_type === Java::ComGithubJavaparserAstType::ClassOrInterfaceType
     end
 
     def collection?
@@ -30,7 +35,11 @@ module Umlparser
       end
     end
 
-    def data_type
+    def formatted_type
+      type + (collection? ? '[]' : '')
+    end
+
+    def type
       case java_node.type
       when Java::ComGithubJavaparserAstType::ClassOrInterfaceType
         if java_node.type.type_arguments.present?

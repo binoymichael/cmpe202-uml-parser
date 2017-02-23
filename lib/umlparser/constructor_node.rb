@@ -20,7 +20,7 @@ module Umlparser
                       end]
     end
 
-    def data_type
+    def type
       java_node.type.to_s
     end
 
