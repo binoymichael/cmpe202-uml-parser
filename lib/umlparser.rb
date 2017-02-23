@@ -24,6 +24,7 @@ class Java::ComGithubJavaparserAstBody::ClassOrInterfaceDeclaration
       modifier: modifiers.any? ? modifiers.first.name.downcase : nil,
       extends: extended_types.map(&:to_s),
       implements: implemented_types.map(&:to_s),
+      dependencies: [],
     }
   end
 end
@@ -70,7 +71,7 @@ class Java::ComGithubJavaparserAstBody::MethodDeclaration
     {
       type: :method,
       modifier: modifiers.any? ? modifiers.first.name.downcase : nil,
-      return_type: data_type,
+      data_type: data_type,
       parameters: params,
       visibility: true,
     }
@@ -184,12 +185,21 @@ class UmlGraph
             child_props[:is_association] = false
           end
         end
+
+        if child_props[:type] == :method 
+          child_props[:parameters].each do |param_name, param_type|
+            if ast.key?(param_type) && ast[param_type][:type] == :interface
+              klass_props[:dependencies] << param_type
+            end
+          end
+        end
       end
     end
   end
 
   def write(filename)
     scrub!
+    pp ast
     File.open(filename, 'w') do |f|
       result = []
       ast.each do |klass, props|
@@ -203,34 +213,49 @@ class UmlGraph
 
   def uml_graph(klass, props)
     header_string = "%{modifier} %{type} %{name}" % {modifier: props[:modifier], type: props[:type], name: klass}
+    header_string += " extends #{props[:extends][0]}" if props[:extends].any?
+    header_string += " implements #{props[:implements].join(', ')}" if props[:implements].any?
+
     attributes = []
     associations = []
+    dependencies = []
+    props[:dependencies].each do |t|
+      dependencies << " * @depend - - - #{t}"
+    end
 
     props[:children].each do |child, c_props|
       next if c_props[:visibility] == false
 
       formatted_props = c_props.merge(name: child)
       formatted_props[:data_type] += '[]' if formatted_props[:is_collection]
+      formatted_props[:parameters] = formatted_props[:parameters].map do |k,v|
+                                        "#{v} #{k}"
+      end.join(', ')
 
       if c_props[:is_association]
         association_arity = c_props[:is_collection] ? '0..*' : '0..1'
         associations << [association_arity, c_props[:data_type]]
       else
-        attributes << "%{modifier} %{data_type} %{name};" % formatted_props
+        if c_props[:type] == :attribute
+          attributes << "%{modifier} %{data_type} %{name};" % formatted_props
+        elsif c_props[:type] == :method
+          attributes << "%{modifier} %{data_type} %{name}(%{parameters});" % formatted_props
+        end
       end
     end
-    uml_graph_templatify(header_string, attributes, associations)
+    uml_graph_templatify(header_string, attributes, associations, dependencies)
   end
 
-  def uml_graph_templatify(header_string, attributes, associations)
+  def uml_graph_templatify(header_string, attributes, associations, dependencies)
     lines = []
-    if associations.any?
       lines << '/**'
       associations.each do |assoc|
         lines << " * @assoc - - #{assoc.first} #{assoc.last}"
       end
+      dependencies.each do |d|
+        lines << d
+      end
       lines << ' */'
-    end
 
     lines << header_string
     lines << '{'
@@ -257,7 +282,7 @@ output_png = "#{source}.png"
 
 
 require 'open3'
-commands = ["java", "-jar", "lib/umlgraph-5.7.2.23.jar", "-private", "-attributes", "-types", "-visibility", "-output", dot_file]
+commands = ["java", "-jar", "lib/umlgraph-5.7.2.23.jar", "-private", "-attributes", "-operations", "-types", "-visibility", "-output", dot_file]
 commands << output_file
 output, status = Open3.capture2(*commands)
 puts output            # -> "hello; rm -rf *\n"
