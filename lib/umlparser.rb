@@ -228,9 +228,6 @@ class UmlGraph
 
       formatted_props = c_props.merge(name: child)
       formatted_props[:data_type] += '[]' if formatted_props[:is_collection]
-      formatted_props[:parameters] = formatted_props[:parameters].map do |k,v|
-                                        "#{v} #{k}"
-      end.join(', ')
 
       if c_props[:is_association]
         association_arity = c_props[:is_collection] ? '0..*' : '0..1'
@@ -239,7 +236,10 @@ class UmlGraph
         if c_props[:type] == :attribute
           attributes << "%{modifier} %{data_type} %{name};" % formatted_props
         elsif c_props[:type] == :method
-          attributes << "%{modifier} %{data_type} %{name}(%{parameters});" % formatted_props
+          attributes << "%{modifier} %{data_type} %{name}(%{parameters});" %
+                          formatted_props.merge(
+                            parameters: formatted_props[:parameters].map { |k,v| "#{v} #{k}" }.join(', ')
+                          )
         end
       end
     end
