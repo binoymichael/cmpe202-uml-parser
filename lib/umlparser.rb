@@ -35,7 +35,8 @@ if status.exitstatus != 0
   raise 'Error'
 end
 
-commands = ["dot", "-T", "png", "-o", output_png, dot_file]
+commands = ["dot", "-T", "png", "-Gdpi=300", "-o", output_png, dot_file]
+
 output, status = Open3.capture2(*commands)
 #TODO Better output statements
 

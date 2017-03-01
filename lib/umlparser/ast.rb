@@ -18,11 +18,11 @@ module Umlparser
     def visit(node, tree)
       case node
       when Java::ComGithubJavaparserAstBody::ClassOrInterfaceDeclaration
-        umlnode = node.interface? ? IntefaceNode.new(node) : ClassNode.new(node)
+        umlnode = node.interface? ? InterfaceNode.new(node) : ClassNode.new(node)
         tree[umlnode.name] = umlnode
         super(node, umlnode.children)
       when Java::ComGithubJavaparserAstBody::FieldDeclaration
-        modifier = (m = node.modifiers.first) ? m.name.downcase.to_sym : :package
+        modifier = (m = node.modifiers.first) ? m.name.downcase.to_sym : ''
         node.variables.each do |variable|
           umlnode = AttributeNode.new(modifier, variable)
           tree[umlnode.name] = umlnode

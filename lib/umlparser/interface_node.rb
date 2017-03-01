@@ -15,7 +15,7 @@ module Umlparser
     def modifier
       @modifier ||= begin
                       m = java_node.modifiers
-                      m.any? ? m.first.name.downcase.to_sym : :package
+                      m.any? ? m.first.name.downcase.to_sym : ''
                     end
     end
 

@@ -33,14 +33,31 @@ module Umlparser
                 child_node.association = false
               end
             end
-          elsif child_node.is_a? MethodNode
-            method = child_node
 
-            child_node.parameters.each do |_, param_type|
-              if (a = ast[param_type]) && a.is_a?(InterfaceNode)
-                klass_node.dependencies << param_type
+            if attribute.modifier == :private
+              getter_name = 'get' << attribute.name.capitalize
+              setter_name = 'set' << attribute.name.capitalize
+
+              if (getter_node = klass_node.children[getter_name]) &&
+                  (setter_node = klass_node.children[setter_name]) &&
+                  getter_node.modifier == :public && 
+                  setter_node.modifier == :public
+
+                attribute.modifier = :public
+                getter_node.modifier = :private
+                setter_node.modifier = :private
               end
             end
+          elsif (child_node.is_a?(MethodNode) || child_node.is_a?(ConstructorNode)) && klass_node.is_a?(ClassNode)
+            method = child_node
+            child_node.parameters.each do |_, param_type|
+              if (a = ast[param_type]) && a.is_a?(InterfaceNode)
+                unless klass_node.dependencies.include?(param_type)
+                  klass_node.dependencies << param_type 
+                end
+              end
+            end
+
           end
         end
       end
@@ -51,10 +68,11 @@ module Umlparser
       dependencies = []
       attributes = []
       methods = []
+      constructors = []
 
       class_or_interface = class_node.is_a?(ClassNode) ? 'class' : 'interface'
       header_string = "#{class_node.modifier} #{class_or_interface} #{class_node.name}" 
-      header_string += " extends #{class_node.extends}" if class_node.extends.any?
+      header_string += " extends #{class_node.extends.first}" if class_node.extends.any?
       header_string += " implements #{class_node.implements.join(', ')}" if class_node.implements.any?
 
       class_node.children.each do |_, child_node|
@@ -63,9 +81,15 @@ module Umlparser
           if child_node.association?
             associations << " * @assoc #{child_node.reverse_association || '-'} - #{child_node.association} #{child_node.type}"
           else
+            next unless [:public, :private].include?(child_node.modifier)
             attributes << "\t#{child_node.modifier} #{child_node.formatted_type} #{child_node.name};"
           end
+        elsif child_node.is_a?(ConstructorNode)
+          param_string = child_node.parameters.map { |k,v| "#{v} #{k}" }.join(', ')
+          constructors << "\t#{child_node.modifier} void #{child_node.name}(#{param_string});"
         elsif child_node.is_a?(MethodNode)
+          next unless child_node.modifier == :public
+
           param_string = child_node.parameters.map { |k,v| "#{v} #{k}" }.join(', ')
           methods << "\t#{child_node.modifier} #{child_node.type} #{child_node.name}(#{param_string});"
         end
@@ -82,6 +106,7 @@ module Umlparser
       yield header_string
       yield '{'
       attributes.each { |a| yield a }
+      constructors.each { |c| yield c }
       methods.each { |m| yield m }
       yield '}'
       yield "\n"
@@ -93,7 +118,7 @@ module Umlparser
            child_node.type == klass_node.name &&
            child_node.association?
 
-          attribute.reverse_association = child_node.collection? ? '0..*' : '0..1'
+          attribute.reverse_association = child_node.collection? ? '*' : '0..1'
           child_node.visible = false
         end
       end
