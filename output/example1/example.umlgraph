@@ -1,0 +1,8 @@
+class Person {
+  private String Name;
+  protected String Name;
+}
+
+class Employee extends Person {}
+
+class Client extends Person {}

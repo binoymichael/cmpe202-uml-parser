@@ -10,7 +10,7 @@ public class A {
    
   private Collection<B> b;
 	 
-	private C[] c;
+	private C c;
 	 
 	private Collection<D> d;
 	 
