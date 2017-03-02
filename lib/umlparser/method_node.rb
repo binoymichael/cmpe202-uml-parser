@@ -2,7 +2,7 @@
 module Umlparser
   class MethodNode
     
-    attr_reader :java_node
+    attr_reader :java_node, :method_body_ast
     attr_writer :modifier
     attr_accessor :visible
     alias_method :visible?, :visible
@@ -10,6 +10,9 @@ module Umlparser
     def initialize(java_node)
       @java_node = java_node
       @visible = true
+      
+      @method_body_ast = {}
+      MethodStatementVisitor.new.visit(java_node, method_body_ast)
     end
 
     def name
@@ -22,9 +25,8 @@ module Umlparser
                       end]
     end
 
-    #TODO what about collection parameters
     def type
-      java_node.type.to_s
+      @type ||= java_node.type.to_s
     end
 
     def modifier

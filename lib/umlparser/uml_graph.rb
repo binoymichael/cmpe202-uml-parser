@@ -50,6 +50,8 @@ module Umlparser
             end
           elsif (child_node.is_a?(MethodNode) || child_node.is_a?(ConstructorNode)) && klass_node.is_a?(ClassNode)
             method = child_node
+
+            # Dependency via parameters
             child_node.parameters.each do |_, param_type|
               if (a = ast[param_type]) && a.is_a?(InterfaceNode)
                 unless klass_node.dependencies.include?(param_type)
@@ -58,6 +60,29 @@ module Umlparser
               end
             end
 
+            #Dependency via method calls
+            child_node.method_body_ast.each do |object, object_props|
+              next unless object_props[:calls].any? 
+
+              method_receiver_type = object_props[:type]
+              method_receiver_type ||= ast[object]
+              if method_receiver_type.nil? &&
+                (attribute = klass_node.children[object]) && 
+                (attribute.is_a?(InterfaceNode))
+                method_receiver_type = attribute.type
+              end
+
+              if method_receiver_type &&
+                 (method_receiver_node = ast[method_receiver_type]) && 
+                 (method_receiver_node.is_a?(InterfaceNode))
+
+                  if (method_receiver_node.children.keys & object_props[:calls]).any?
+                    unless klass_node.dependencies.include?(method_receiver_type)
+                      klass_node.dependencies << method_receiver_type 
+                    end
+                  end
+              end
+            end
           end
         end
       end

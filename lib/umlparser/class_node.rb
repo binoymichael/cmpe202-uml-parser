@@ -21,11 +21,11 @@ module Umlparser
     end
 
     def extends
-      @extends = java_node.extended_types.map(&:to_s)
+      @extends ||= java_node.extended_types.map(&:to_s)
     end
 
     def implements
-      @implements = java_node.implemented_types.map(&:to_s)
+      @implements ||= java_node.implemented_types.map(&:to_s)
     end
 
   end

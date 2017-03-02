@@ -25,14 +25,16 @@ module Umlparser
     end
 
     def collection?
-      case java_node.type
-      when Java::ComGithubJavaparserAstType::ClassOrInterfaceType
-        java_node.type.type_arguments.present?
-      when Java::ComGithubJavaparserAstType::ArrayType
-        true
-      else
-        false
-      end
+      @collection ||= begin
+                        case java_node.type
+                        when Java::ComGithubJavaparserAstType::ClassOrInterfaceType
+                          java_node.type.type_arguments.present?
+                        when Java::ComGithubJavaparserAstType::ArrayType
+                          true
+                        else
+                          false
+                        end
+                      end
     end
 
     def formatted_type
@@ -40,20 +42,22 @@ module Umlparser
     end
 
     def type
-      case java_node.type
-      when Java::ComGithubJavaparserAstType::ClassOrInterfaceType
-        if java_node.type.type_arguments.present?
-          java_node.type.type_arguments.get.first.to_s
-        else
-          java_node.type.to_s
-        end
-      when Java::ComGithubJavaparserAstType::ArrayType
-        java_node.type.element_type.to_s
-      when Java::ComGithubJavaparserAstType::PrimitiveType
-        java_node.type.to_s
-      else
-        java_node.type.to_s
-      end
+      @type ||= begin
+                  case java_node.type
+                  when Java::ComGithubJavaparserAstType::ClassOrInterfaceType
+                    if java_node.type.type_arguments.present?
+                      java_node.type.type_arguments.get.first.to_s
+                    else
+                      java_node.type.to_s
+                    end
+                  when Java::ComGithubJavaparserAstType::ArrayType
+                    java_node.type.element_type.to_s
+                  when Java::ComGithubJavaparserAstType::PrimitiveType
+                    java_node.type.to_s
+                  else
+                    java_node.type.to_s
+                  end
+                end
     end
   end
 end

@@ -43,6 +43,7 @@ public class Decorator implements Component
 }
 
 /**
+ * @depend - - - Component
  */
 public class Tester
 {

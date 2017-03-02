@@ -101,5 +101,7 @@ digraph G {
 	c4:p -> c0:p [taillabel="", label="", headlabel="0..1", fontname="Helvetica", fontcolor="black", fontsize=10.0, color="black", arrowhead=none];
 	// Decorator DEPEND Component
 	c4:p -> c0:p [taillabel="", label="", headlabel="", fontname="Helvetica", fontcolor="black", fontsize=10.0, color="black", arrowhead=open, style=dashed];
+	// Tester DEPEND Component
+	c5:p -> c0:p [taillabel="", label="", headlabel="", fontname="Helvetica", fontcolor="black", fontsize=10.0, color="black", arrowhead=open, style=dashed];
 }
 

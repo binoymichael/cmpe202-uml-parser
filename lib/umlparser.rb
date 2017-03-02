@@ -12,6 +12,8 @@ require_relative 'javaparser-core-3.0.1.jar'
 
 require_relative 'umlparser/version'
 require_relative 'umlparser/ast'
+require_relative 'umlparser/node_visitor'
+require_relative 'umlparser/method_statement_visitor'
 require_relative 'umlparser/node'
 require_relative 'umlparser/class_node'
 require_relative 'umlparser/interface_node'
