@@ -1,0 +1,10 @@
+.PS
+copy "sequence.pic";
+object(S,"s:Switch");
+object(P,"p:Pump");
+message(S,P,"run()");
+message(S,P,"stop()");
+complete(S);
+complete(P);
+.PE 
+
