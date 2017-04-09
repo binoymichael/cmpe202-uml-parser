@@ -3,9 +3,9 @@ import org.aspectj.lang.JoinPoint;
 public aspect TracingAspect {
 	private int callDepth;
 
-	//pointcut traced() : !within(TracingAspect) && execution(public * *.*(..)) ;
+  /*pointcut traced() : !within(TracingAspect) && execution(public * *.*(..)); // && cflow(execution(*.new(..)));*/
 	/*pointcut constructors() : !within(TracingAspect) && execution(*.new(..)) && !call(java..new(..));*/
-  pointcut traced() : !within(TracingAspect) && execution(* *.*(..)) && !cflow(execution(*.new(..)));
+  pointcut traced() : !within(TracingAspect) && call(* *.*(..)) && !cflow(execution(*.new(..)));
 
   /*before() : constructors() {*/
     /*print("Constructor", thisJoinPoint);*/
@@ -28,8 +28,19 @@ public aspect TracingAspect {
 		System.out.println("args" + ": " + message.getArgs());
 		System.out.println("kind" + ": " + message.getKind());
 		System.out.println("signature" + ": " + message.getSignature());
+		System.out.println("signature:name" + ": " + message.getSignature().getName());
 		System.out.println("source" + ": " + message.getSourceLocation());
-		System.out.println("target" + ": " + message.getTarget());
-		System.out.println("this" + ": " + message.getThis());
+    if (message.getTarget() != null) {
+      System.out.println("target" + ": " + message.getTarget().getClass());
+    }
+    else {
+      System.out.println("target is null");
+    }
+    if (message.getThis() != null) {
+      System.out.println("this" + ": " + message.getThis().getClass());
+    }
+    else {
+      System.out.println("target is null");
+    }
 	}
 }
