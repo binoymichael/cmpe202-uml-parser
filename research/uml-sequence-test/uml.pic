@@ -1,10 +1,15 @@
 .PS
 copy "sequence.pic";
-object(S,"s:Switch");
-object(P,"p:Pump");
-message(S,P,"run()");
-message(S,P,"stop()");
-complete(S);
-complete(P);
+object(M,"Main");
+object(T,"TheEconomy");
+step();
+active(M);
+message(M,T,"attach()");
+active(T);
+step();
+inactive(T);
+step();
+complete(M);
+complete(T);
 .PE 
 
