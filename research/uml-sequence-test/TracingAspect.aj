@@ -1,46 +1,86 @@
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.Signature;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.Stack;
 
 public aspect TracingAspect {
+
 	private int callDepth;
 
-  /*pointcut traced() : !within(TracingAspect) && execution(public * *.*(..)); // && cflow(execution(*.new(..)));*/
-	/*pointcut constructors() : !within(TracingAspect) && execution(*.new(..)) && !call(java..new(..));*/
-  pointcut traced() : !within(TracingAspect) && call(* *.*(..)) && !cflow(execution(*.new(..)));
+  pointcut mainCall() : !within(TracingAspect) && 
+                        execution(public static void main(..));
 
-  /*before() : constructors() {*/
-    /*print("Constructor", thisJoinPoint);*/
-  /*}*/
+  pointcut traced() : !within(TracingAspect) && 
+                      call(* *.*(..)) && 
+                      !call(* java..*.*(..)) && 
+                      !cflow(execution(*.new(..)));
 
-  before() : traced() {
-    print("Message", thisJoinPoint);
-    callDepth++;
+  before() : mainCall() {
+    System.out.println(thisJoinPoint);
+    JoinPoint message = thisJoinPoint;
+    System.out.println("longstring" + ": " + message.toLongString());
+               System.out.println("args" + ": " + message.getArgs());
+               System.out.println("kind" + ": " + message.getKind());
+               System.out.println("signature" + ": " + message.getSignature());
+               System.out.println("signature:name" + ": " + message.getSignature().getName());
+               System.out.println("source" + ": " + message.getSourceLocation());
+  }
+  after() : mainCall() {
+    System.out.println("the end");
   }
 
-	/*after() : traced() {*/
-		/*callDepth--;*/
-		/*print("After", thisJoinPoint);*/
-	/*}*/
+  before() : traced() {
+    beforeMethodCall(thisJoinPoint);
+  }
 
-	private void print(String prefix, JoinPoint message) {
-    
-    System.out.println(prefix + ": " + "-----");
-		System.out.println("longstring" + ": " + message.toLongString());
-		System.out.println("args" + ": " + message.getArgs());
-		System.out.println("kind" + ": " + message.getKind());
-		System.out.println("signature" + ": " + message.getSignature());
-		System.out.println("signature:name" + ": " + message.getSignature().getName());
-		System.out.println("source" + ": " + message.getSourceLocation());
-    if (message.getTarget() != null) {
-      System.out.println("target" + ": " + message.getTarget().getClass());
+  after() : traced() {
+    /*afterMethodCall(thisJoinPoint);*/
+  }
+
+	private void beforeMethodCall(JoinPoint joinPoint) {
+    String self = null;
+    if (joinPoint.getThis() != null) {
+      self = joinPoint.getThis().getClass().getName();
     }
     else {
-      System.out.println("target is null");
+      self = "Main";
     }
-    if (message.getThis() != null) {
-      System.out.println("this" + ": " + message.getThis().getClass());
+
+    String target = null; 
+    if (joinPoint.getTarget() != null) {
+      target = joinPoint.getTarget().getClass().getName();
     }
     else {
-      System.out.println("target is null");
+      target = "Main";
     }
+
+    Signature methodSignature = joinPoint.getSignature();
+    String modifier = methodSignature.toString().split(" ")[0];
+    String parameters = null;
+    Pattern pattern = Pattern.compile("\\(.*\\)");
+    Matcher matcher = pattern.matcher(methodSignature.toString());
+    if (matcher.find()) {
+      parameters = matcher.group();
+    }
+    String methodName = methodSignature.getName();
+    String message = methodName + ((parameters != null) ? parameters : "") + " : " + modifier;
+
+    System.out.println("message(" + self + "," + target + "," + "\"" + message + "\"" + ");");
+    System.out.println("active(" + target + ");");
+    System.out.println("step();");
 	}
+
+	private void afterMethodCall(JoinPoint joinPoint) {
+    String target = null; 
+    if (joinPoint.getTarget() != null) {
+      target = joinPoint.getTarget().getClass().getName();
+    }
+    else {
+      target = "Main";
+    }
+    System.out.println("inactive(" + target + ");");
+    System.out.println("step();");
+  }
+
 }
