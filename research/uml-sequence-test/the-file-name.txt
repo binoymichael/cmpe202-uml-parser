@@ -112,5 +112,4 @@ complete(Main);
 complete(TheEconomy);
 complete(Pessimist);
 complete(Optimist);
-.PE 
-
+.PE
