@@ -7,7 +7,7 @@ if ! [ -n `which java` ]; then
 fi
 
 sequenceflag=false
-usage () { echo "How to use"; }
+usage () { echo "./umlparser [options] input-folder output-file\nPrints class diagram by default\nUse -s flag to draw sequence diagram"; }
 while getopts ":sh" opt; do
   case ${opt} in
     h ) usage
@@ -65,5 +65,4 @@ else
   # Cleaning up files
   rm -rf $tmpdir
   rm $2.svg.tmp
-
 fi
