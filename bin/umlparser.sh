@@ -63,13 +63,15 @@ else
   echo 'Preparing sequence diagram ...'
   tmpdir=`mktemp -d`
   cp "$1/"*".java" $tmpdir
-  cp TracingAspect.aj $tmpdir
+  cp "$BASEDIR/TracingAspect.aj" $tmpdir
   ajc -1.8 $tmpdir/*.java $tmpdir/*.aj
   java -cp "$BASEDIR/aspectjrt-1.8.8.jar:$tmpdir" Main
+  cp "$BASEDIR/sequence.pic" .
   pic2plot -Tsvg  uml.pic > "$2.svg.tmp"
-  awk 'NR==1,/transform/{sub(/transform=".*" xml/, "transform=\"translate(0.25,0.1) scale(0.05, -0.05)\" xml")} 1' "$2.svg.tmp" > "$2.svg"
+  awk 'NR==1,/transform/{sub(/transform=".*" xml/, "transform=\"translate(0.25,0.05) scale(0.06, -0.06)\" xml")} 1' "$2.svg.tmp" > "$2.svg"
 
   # Cleaning up files
+  rm sequence.pic
   rm -rf $tmpdir
   rm $2.svg.tmp
 fi
