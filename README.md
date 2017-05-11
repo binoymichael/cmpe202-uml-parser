@@ -9,15 +9,24 @@ Libraries used
   - UMLGraph
   - dot
 
-I used JavaParser to parse the input *.java files. I wrote the main uml parser code in JRuby. My solution parses the java files into an intermediate file that can be consumed by UMLGraph. UMLGraph and the dot package was used to draw the final class diagram
+Steps involved in creating the class diagram
+  - I used JavaParser to parse the input *.java files. 
+  - I wrote the main UML parser code in JRuby. My solution parses the java files into Abstract Syntax Tree (AST) like data structure. The specific rules specified by the Professor is then used to scrub and modify the AST data structure.
+  - Finally an intermediate text file is created from the AST.
+  - The intermediate file is then passed to the UMLGraph to generate a dot file.
+  - The dot file is consumed by the dot utility to draw the final class diagram.
 
 # Sequence Diagram
 Libraries used
   - AspectJ
   - plotutils
 
-I wrote pointcuts in AspectJ to trace the method calls. This aspectj file is compiled along with the input java file with an AspectJ compiler. Running the compiled program generates a text file that can be consumed by UMLGraph to produce a sequence diagram. UMLGraph and the pic2plot utility in the plotutils package is finally used to draw the sequence diagram.
-
+Steps involved in creating the sequence diagram
+  - AspectJ was used to create the sequence diagram
+  - I wrote pointcuts in AspectJ to trace the method calls. 
+  - This aspectj file is compiled along with the input java file with an AspectJ compiler. 
+  - Running the compiled program generates a text file that can be consumed by UMLGraph to produce a sequence diagram. 
+  - UMLGraph and the pic2plot utility in the plotutils package is finally used to draw the sequence diagram.
 
 # Testing on an EC2 instance
 ##INSTRUCTIONS TO RUN APPLICATION:
